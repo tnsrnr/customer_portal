@@ -264,7 +264,7 @@ export default function SRListPage() {
       className="min-h-screen relative overflow-hidden"
       style={{ background: 'var(--bg-primary)' }}
     >
-      <div className="relative z-10 h-[calc(100vh-64px)] p-3 space-y-3 overflow-hidden">
+      <div className="relative z-10 min-h-[calc(100vh-64px)] p-3 space-y-3">
         {/* 헤더 */}
         <div className="flex items-center gap-4 mb-4">
           <motion.button
@@ -303,7 +303,7 @@ export default function SRListPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-4 mb-3"
+          className="mt-4 mb-6 flex-1"
         >
           <SRTable 
             data={data.srList} 

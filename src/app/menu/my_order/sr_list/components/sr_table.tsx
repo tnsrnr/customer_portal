@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import TabulatorGrid, { TabulatorGridRef, DataType } from '/Users/tnsrnr/grid3/customer_portal/src/components/common/TabulatorGrid';
+import TabulatorGrid, { TabulatorGridRef, DataType } from '@/common/components/TabulatorGrid';
 import "tabulator-tables/dist/css/tabulator.min.css";
 import { DateTime } from "luxon";
 import { useTheme } from '@/common/hooks/useTheme';
