@@ -12,7 +12,7 @@ export default function MyOrderPage() {
   const subMenus = [
     {
       name: '진행중인 주문',
-      path: '/menu/my_order/active_orders',
+      path: '/menu/my_order/sr_list',
       icon: Package,
       description: '현재 처리 중인 주문 현황을 확인하세요',
       stats: '3개 주문'

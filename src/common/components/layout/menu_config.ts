@@ -39,7 +39,7 @@ export const menuItems: MenuItem[] = [
     submenu: [
       {
         name: '진행중인 주문',
-        path: '/menu/my_order/active_orders',
+        path: '/menu/my_order/sr_list',
         icon: Package,
         description: '현재 처리 중인 주문'
       },
