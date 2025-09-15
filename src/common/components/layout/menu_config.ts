@@ -2,9 +2,11 @@ import {
   BarChart3, 
   ShoppingCart, 
   FileText,
+  Calculator,
   Package,
   History,
-  MapPin
+  MapPin,
+  Send
 } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 
@@ -35,33 +37,19 @@ export const menuItems: MenuItem[] = [
     name: 'My Order', 
     path: '/menu/my_order', 
     icon: ShoppingCart,
-    description: '내 물류 주문',
-    submenu: [
-      {
-        name: '진행중인 주문',
-        path: '/menu/my_order/sr_list',
-        icon: Package,
-        description: '현재 처리 중인 주문'
-      },
-      {
-        name: '주문 이력',
-        path: '/menu/my_order/order_history',
-        icon: History,
-        description: '과거 주문 내역'
-      },
-      {
-        name: '주문 추적',
-        path: '/menu/my_order/order_tracking',
-        icon: MapPin,
-        description: '실시간 배송 추적'
-      }
-    ]
+    description: '내 물류 주문'
   },
   { 
     name: 'Quotation', 
     path: '/menu/quotation', 
     icon: FileText,
     description: '물류 견적'
+  },
+  { 
+    name: 'Account', 
+    path: '/menu/account', 
+    icon: Calculator,
+    description: '정산 관리'
   }
 ];
 

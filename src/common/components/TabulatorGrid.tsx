@@ -70,10 +70,12 @@ export interface TabulatorGridProps {
   enableClipboard?: boolean; // 클립보드 기능 활성화
   showSelectionControls?: boolean; // 선택 컨트롤 표시 여부
   enableCellSelectionOnRowSelect?: boolean; // 행 선택 시 셀 선택 초기화 여부
+  showFooter?: boolean; // 푸터(상태바) 표시 여부
   onRowSelected?: (row: RowComponent) => void;
   onRowDeselected?: (row: RowComponent) => void;
   onSelectionChanged?: (message: string) => void;
   onCopySuccess?: (message: string) => void;
+  onCellClick?: (e: Event, cell: CellComponent) => void;
   className?: string;
   theme?: 'light' | 'dark'; // 테마 지원 추가
   additionalOptions?: Record<string, any>;
@@ -106,10 +108,12 @@ const TabulatorGrid = forwardRef<TabulatorGridRef, TabulatorGridProps>((props, r
     enableClipboard = true,
     showSelectionControls = true,
     enableCellSelectionOnRowSelect = true,
+    showFooter = true,
     onRowSelected,
     onRowDeselected,
     onSelectionChanged,
     onCopySuccess,
+    onCellClick,
     className = "",
     theme = 'light',
     additionalOptions = {}
@@ -990,6 +994,11 @@ const TabulatorGrid = forwardRef<TabulatorGridRef, TabulatorGridProps>((props, r
           tabulatorRef.current?.on("rowSelected", updateDataStats);
           tabulatorRef.current?.on("rowDeselected", updateDataStats);
           
+          // cellClick 이벤트 등록
+          if (onCellClick) {
+            tabulatorRef.current?.on("cellClick", onCellClick);
+          }
+          
           // 모든 placeholder 요소에 흰색 배경 강제 적용
           function forceWhitePlaceholder() {
             // 모든 placeholder 요소 찾기
@@ -1332,9 +1341,10 @@ const TabulatorGrid = forwardRef<TabulatorGridRef, TabulatorGridProps>((props, r
       </div>
       
       {/* 커스텀 푸터 */}
-      <div 
-        className={`flex items-center justify-between px-4 py-2 text-sm border-t ${theme === 'dark' ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-100 text-gray-600 border-gray-200'}`}
-      >
+      {showFooter && (
+        <div 
+          className={`flex items-center justify-between px-4 py-2 text-sm border-t ${theme === 'dark' ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-100 text-gray-600 border-gray-200'}`}
+        >
         <div className="flex items-center gap-2">
           <span>총 <span className="font-medium">{dataStats.total}</span>개 중 <span className="font-medium">{selectedCount}</span>개 선택</span>
         </div>
@@ -1387,6 +1397,7 @@ const TabulatorGrid = forwardRef<TabulatorGridRef, TabulatorGridProps>((props, r
           </div>
         </div>
       </div>
+      )}
       
       {/* 복사를 위한 숨겨진 텍스트 영역 */}
       <textarea

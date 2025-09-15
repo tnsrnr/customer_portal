@@ -11,8 +11,7 @@ function cn(...classes: Array<string | false | undefined | null>): string {
   return classes.filter(Boolean).join(' ');
 }
 
-import { RefreshCw, Calendar, Settings, LogOut, Sun, Moon, ChevronDown } from 'lucide-react';
-import { useGlobalStore } from '@/global/store/slices/global';
+import { Settings, LogOut, Sun, Moon, ChevronDown } from 'lucide-react';
 import { clearSession } from '@/app/auth/session';
 import { useTheme } from '@/common/hooks/useTheme';
 
@@ -21,10 +20,41 @@ function MenuItem({ menu, pathname }: {
   menu: any; 
   pathname: string; 
 }) {
+  // 메뉴별 색상 정의
+  const getMenuColor = (menuName: string) => {
+    switch (menuName) {
+      case 'Overview': return {
+        primary: '#3b82f6', // blue
+        secondary: 'rgba(59, 130, 246, 0.1)',
+        hover: 'rgba(59, 130, 246, 0.2)'
+      };
+      case 'My Order': return {
+        primary: '#22c55e', // green
+        secondary: 'rgba(34, 197, 94, 0.1)',
+        hover: 'rgba(34, 197, 94, 0.2)'
+      };
+      case 'Quotation': return {
+        primary: '#9333ea', // purple
+        secondary: 'rgba(147, 51, 234, 0.1)',
+        hover: 'rgba(147, 51, 234, 0.2)'
+      };
+      case 'Account': return {
+        primary: '#f97316', // orange
+        secondary: 'rgba(249, 115, 22, 0.1)',
+        hover: 'rgba(249, 115, 22, 0.2)'
+      };
+      default: return {
+        primary: '#6b7280', // gray
+        secondary: 'rgba(107, 114, 128, 0.1)',
+        hover: 'rgba(107, 114, 128, 0.2)'
+      };
+    }
+  };
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isActive = pathname === menu.path || (menu.submenu && menu.submenu.some((sub: any) => pathname === sub.path));
+  const menuColor = getMenuColor(menu.name);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,33 +78,36 @@ function MenuItem({ menu, pathname }: {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="flex flex-row items-center gap-x-2 px-2 py-2 rounded-lg transition-all duration-200 font-medium text-base backdrop-blur-sm border"
+          className="flex flex-row items-center gap-x-2 px-4 py-2 rounded-full transition-all duration-200 font-medium text-sm"
           style={{
-            background: isActive ? 'var(--bg-card)' : 'var(--bg-tertiary)',
-            color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-            borderColor: isActive ? 'var(--border-primary)' : 'var(--border-secondary)',
-            boxShadow: isActive ? 'var(--shadow-md)' : 'none'
+            background: isActive 
+              ? (theme === 'dark' ? menuColor.secondary : menuColor.secondary)
+              : 'transparent',
+            color: isActive 
+              ? menuColor.primary
+              : 'var(--text-secondary)',
+            boxShadow: isActive 
+              ? `0 4px 12px ${menuColor.secondary}`
+              : 'none'
           }}
           onMouseEnter={(e) => {
             if (!isActive) {
-              e.currentTarget.style.background = 'var(--bg-card)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-              e.currentTarget.style.borderColor = 'var(--border-primary)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+              e.currentTarget.style.background = menuColor.hover;
+              e.currentTarget.style.color = menuColor.primary;
+              e.currentTarget.style.boxShadow = `0 2px 8px ${menuColor.secondary}`;
             }
           }}
           onMouseLeave={(e) => {
             if (!isActive) {
-              e.currentTarget.style.background = 'var(--bg-tertiary)';
+              e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.color = 'var(--text-secondary)';
-              e.currentTarget.style.borderColor = 'var(--border-secondary)';
               e.currentTarget.style.boxShadow = 'none';
             }
           }}
         >
-          {menu.icon && <menu.icon className="w-5 h-5" />}
+          {menu.icon && <menu.icon className="w-4 h-4" />}
           <span className="whitespace-nowrap">{menu.name}</span>
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isDropdownOpen && (
@@ -131,31 +164,34 @@ function MenuItem({ menu, pathname }: {
   return (
     <Link
       href={menu.path}
-      className="flex flex-row items-center gap-x-2 px-2 py-2 rounded-lg transition-all duration-200 font-medium text-base backdrop-blur-sm border"
+      className="flex flex-row items-center gap-x-2 px-4 py-2 rounded-full transition-all duration-200 font-medium text-sm"
       style={{
-        background: isActive ? 'var(--bg-card)' : 'var(--bg-tertiary)',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-        borderColor: isActive ? 'var(--border-primary)' : 'var(--border-secondary)',
-        boxShadow: isActive ? 'var(--shadow-md)' : 'none'
+        background: isActive 
+          ? menuColor.secondary
+          : 'transparent',
+        color: isActive 
+          ? menuColor.primary
+          : 'var(--text-secondary)',
+        boxShadow: isActive 
+          ? `0 4px 12px ${menuColor.secondary}`
+          : 'none'
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = 'var(--bg-card)';
-          e.currentTarget.style.color = 'var(--text-primary)';
-          e.currentTarget.style.borderColor = 'var(--border-primary)';
-          e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+          e.currentTarget.style.background = menuColor.hover;
+          e.currentTarget.style.color = menuColor.primary;
+          e.currentTarget.style.boxShadow = `0 2px 8px ${menuColor.secondary}`;
         }
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = 'var(--bg-tertiary)';
+          e.currentTarget.style.background = 'transparent';
           e.currentTarget.style.color = 'var(--text-secondary)';
-          e.currentTarget.style.borderColor = 'var(--border-secondary)';
           e.currentTarget.style.boxShadow = 'none';
         }
       }}
     >
-      {menu.icon && <menu.icon className="w-5 h-5" />}
+      {menu.icon && <menu.icon className="w-4 h-4" />}
       <span className="whitespace-nowrap">{menu.name}</span>
     </Link>
   );
@@ -293,14 +329,6 @@ function SettingsDropdown({
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { 
-    isRefreshing, 
-    triggerGlobalRefresh, 
-    selectedYear, 
-    selectedMonth, 
-    setSelectedYear, 
-    setSelectedMonth
-  } = useGlobalStore();
   const [isClient, setIsClient] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { theme } = useTheme();
@@ -324,23 +352,8 @@ export function Header() {
     router.push('/auth');
   };
 
-  const handleGlobalRefresh = () => {
-    triggerGlobalRefresh();
-  };
-
-
-
   // 단순화된 메뉴 표시
   const visibleMenus = menuItems;
-
-  // 년도 옵션 (현재 년도 기준 ±2년)
-  const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
-  
-  // 월 옵션
-  const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
-
-  // 서버 사이드 렌더링 시 기본 메뉴 순서 사용
-  const serverSideMenus = menuItems;
 
   return (
     <header className="backdrop-blur-md shadow-xl border-none z-50 relative" style={{ 
@@ -360,69 +373,30 @@ export function Header() {
               />
             </div>
           </Link>
-          {/* 메뉴 네비게이션 */}
-          <div className="flex items-center space-x-2">
-            {/* 메뉴 목록 */}
-            <nav className="flex space-x-2">
-              {visibleMenus.map((menu) => (
-                <MenuItem
-                  key={menu.path}
-                  menu={menu}
-                  pathname={pathname}
-                />
-              ))}
-            </nav>
+          {/* 메뉴 네비게이션 - Pill Navigation 스타일 */}
+          <div className="flex items-center">
+            {/* Pill Navigation Container */}
+            <div className="flex items-center p-1 rounded-full border backdrop-blur-md shadow-lg" style={{
+              background: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+              boxShadow: theme === 'dark' 
+                ? '0 4px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                : '0 4px 20px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+            }}>
+              <nav className="flex space-x-1">
+                {visibleMenus.map((menu) => (
+                  <MenuItem
+                    key={menu.path}
+                    menu={menu}
+                    pathname={pathname}
+                  />
+                ))}
+              </nav>
+            </div>
           </div>
         </div>
         {/* 우측 버튼들 */}
         <div className="flex items-center space-x-3">
-          {/* 년도/월 선택기 */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg border border-white/20">
-            {isClient ? (
-              <Calendar className="w-4 h-4 text-blue-100" />
-            ) : (
-              <span className="w-4 h-4 bg-blue-100 rounded"></span>
-            )}
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-blue-100 text-sm border-none outline-none cursor-pointer"
-            >
-              {yearOptions.map(year => (
-                <option key={year} value={year} className="bg-slate-800 text-white">
-                  {year}년
-                </option>
-              ))}
-            </select>
-            <span className="text-blue-100 text-sm">/</span>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-transparent text-blue-100 text-sm border-none outline-none cursor-pointer"
-            >
-              {monthOptions.map(month => (
-                <option key={month} value={month} className="bg-slate-800 text-white">
-                  {month}월
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          {/* 전역 조회 버튼 */}
-          <button
-            onClick={handleGlobalRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1 px-3 py-2 text-base text-blue-100 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-transparent hover:border-white/20"
-            title="현재 페이지 데이터 새로고침"
-          >
-            {isClient ? (
-              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            ) : (
-              <span className="w-5 h-5 bg-blue-100 rounded"></span>
-            )}
-            <span className="hidden sm:inline">조회</span>
-          </button>
-          
           {/* 설정 드롭다운 */}
           {isClient && (
             <SettingsDropdown

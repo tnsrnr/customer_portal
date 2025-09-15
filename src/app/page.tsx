@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { 
-  BarChart3, ShoppingCart, FileText, 
-  Package, Truck, ArrowRight
+  BarChart3, ShoppingCart, FileText, Calculator, ArrowRight
 } from 'lucide-react';
-import { useTheme } from '@/common/hooks/useTheme';
 
 interface SessionData {
   jsessionId: string;
@@ -26,7 +23,40 @@ export default function HomePage() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { theme } = useTheme();
+
+  // Profile Card 3D 효과를 위한 상태
+  const [cardRotations, setCardRotations] = useState([
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 }
+  ]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, cardIndex: number) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const mouseX = e.clientX - centerX;
+    const mouseY = e.clientY - centerY;
+    
+    const rotateX = (mouseY / rect.height) * -30;
+    const rotateY = (mouseX / rect.width) * 30;
+    
+    setCardRotations(prev => {
+      const newRotations = [...prev];
+      newRotations[cardIndex] = { x: rotateX, y: rotateY };
+      return newRotations;
+    });
+  };
+
+  const handleMouseLeave = (cardIndex: number) => {
+    setCardRotations(prev => {
+      const newRotations = [...prev];
+      newRotations[cardIndex] = { x: 0, y: 0 };
+      return newRotations;
+    });
+  };
 
   useEffect(() => {
     const sessionData = localStorage.getItem('htns-session');
@@ -61,127 +91,101 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-      <div className="relative z-10 p-6">
+    <div className="h-screen relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+      {/* 패턴 배경 */}
+      <div className="absolute inset-0">
+        {/* 기본 그라데이션 */}
+        <div className="absolute inset-0" style={{
+          background: `
+            linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(147, 51, 234, 0.08) 50%, rgba(34, 197, 94, 0.12) 100%)
+          `
+        }}></div>
+        
+        {/* 격자 패턴 - 사각형 패턴 유지 */}
+        <div className="absolute inset-0 opacity-60" style={{
+          backgroundImage: `
+            linear-gradient(rgba(59, 130, 246, 0.25) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.25) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px'
+        }}></div>
+        
+        {/* 점 패턴 - 정적 유지 */}
+        <div className="absolute inset-0 opacity-50" style={{
+          backgroundImage: `
+            radial-gradient(circle at 25px 25px, rgba(147, 51, 234, 0.4) 2px, transparent 2px),
+            radial-gradient(circle at 75px 75px, rgba(34, 197, 94, 0.4) 2px, transparent 2px)
+          `,
+          backgroundSize: '100px 100px, 150px 150px',
+          backgroundPosition: '0 0, 50px 50px'
+        }}></div>
+        
+        {/* 원형 패턴 - 정적 유지 */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.3) 0%, transparent 4%),
+            radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.25) 0%, transparent 4%),
+            radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.2) 0%, transparent 3%),
+            radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 3%)
+          `,
+          backgroundSize: '350px 350px, 450px 450px, 250px 250px, 300px 300px',
+          backgroundPosition: '0% 0%, 100% 100%, 50% 0%, 0% 100%'
+        }}></div>
+      </div>
+      
+      <div className="relative z-10 h-full flex items-center justify-center -mt-16">
 
         {/* 메인 콘텐츠 */}
-        <div className="max-w-7xl mx-auto">
-          {/* 브랜드 헤더 */}
-          <motion.div 
-            initial={{ y: -30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--accent-blue)' }}>
-                <Package className="w-6 h-6 text-white" />
-            </div>
-              <h1 className="text-4xl font-bold" style={{ color: 'var(--text-primary)' }}>화주 포탈</h1>
-            </div>
-            <p className="text-lg" style={{ color: 'var(--text-tertiary)' }}>
-              스마트한 물류 관리의 시작
-            </p>
-          </motion.div>
-          
-          {/* 통계 대시보드 */}
-            <motion.div
-            initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
-          >
-            {/* 활성 주문 */}
-            <div className="backdrop-blur-md rounded-xl p-6 border" style={{ 
-              background: 'var(--bg-card)', 
-              borderColor: 'var(--border-primary)' 
-            }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 rounded-lg" style={{ background: 'var(--accent-blue)', opacity: 0.2 }}>
-                  <Package className="w-5 h-5" style={{ color: 'var(--accent-blue)' }} />
-                </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>3</span>
-                </div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>진행중인 주문</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>이번 주 +1</p>
-                </div>
-
-            {/* 완료된 주문 */}
-            <div className="backdrop-blur-md rounded-xl p-6 border" style={{ 
-              background: 'var(--bg-card)', 
-              borderColor: 'var(--border-primary)' 
-            }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 rounded-lg" style={{ background: 'var(--accent-green)', opacity: 0.2 }}>
-                  <Truck className="w-5 h-5" style={{ color: 'var(--accent-green)' }} />
-                </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>12</span>
-              </div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>완료된 주문</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>이번 달 +3</p>
-              </div>
-              
-            {/* 견적 요청 */}
-            <div className="backdrop-blur-md rounded-xl p-6 border" style={{ 
-              background: 'var(--bg-card)', 
-              borderColor: 'var(--border-primary)' 
-            }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 rounded-lg" style={{ background: 'var(--accent-purple)', opacity: 0.2 }}>
-                  <FileText className="w-5 h-5" style={{ color: 'var(--accent-purple)' }} />
-                </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>5</span>
-              </div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>대기중인 견적</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>평균 2일</p>
-                </div>
-
-            {/* 완료된 견적 */}
-            <div className="backdrop-blur-md rounded-xl p-6 border" style={{ 
-              background: 'var(--bg-card)', 
-              borderColor: 'var(--border-primary)' 
-            }}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 rounded-lg" style={{ background: 'var(--accent-orange)', opacity: 0.2 }}>
-                  <FileText className="w-5 h-5" style={{ color: 'var(--accent-orange)' }} />
-                </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>8</span>
-              </div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>완료된 견적</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>이번 달 +2</p>
-                  </div>
-                </motion.div>
-
-
+        <div className="w-full max-w-6xl px-6">
           {/* 메인 서비스 */}
-                <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-          >
-            <h3 className="text-xl font-semibold mb-6 text-center" style={{ color: 'var(--text-primary)' }}>
-              주요 서비스
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {/* Overview */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
-                className="backdrop-blur-md rounded-2xl p-8 border transition-all duration-300 cursor-pointer hover:scale-105 group"
-                style={{ 
-                  background: 'var(--bg-card)', 
-                  borderColor: 'var(--border-primary)' 
-                }}
-                onClick={() => router.push('/menu/overview')}
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--accent-blue)', opacity: 0.2 }}>
-                    <BarChart3 className="w-8 h-8" style={{ color: 'var(--accent-blue)' }} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Overview</h3>
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>서비스 현황 개요</p>
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-tertiary)' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 w-full h-[450px]">
+            {/* Overview */}
+            <div
+              className="profile-card blue-glow backdrop-blur-2xl rounded-3xl p-5 border transition-all duration-500 cursor-pointer group flex flex-col justify-center relative overflow-hidden"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                boxShadow: `
+                  0 20px 60px rgba(0, 0, 0, 0.15),
+                  0 8px 25px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.05)
+                `,
+                transform: `perspective(1000px) rotateX(${cardRotations[0].x}deg) rotateY(${cardRotations[0].y}deg) scale3d(1.1, 1.1, 1.1)`,
+                transformStyle: 'preserve-3d',
+                opacity: 1
+              }}
+              onMouseMove={(e) => handleMouseMove(e, 0)}
+              onMouseLeave={() => handleMouseLeave(0)}
+              onClick={() => router.push('/menu/overview')}
+            >
+              {/* 컴포넌트 내부 그라데이션 오버레이 */}
+              <div className="absolute inset-0 opacity-40" style={{
+                background: `
+                  linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, transparent 50%, rgba(59, 130, 246, 0.08) 100%),
+                  radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 30%)
+                `
+              }}></div>
+              <div className="text-center relative z-10" style={{
+                transform: `translateZ(50px) rotateX(${cardRotations[0].x * 0.1}deg) rotateY(${cardRotations[0].y * 0.1}deg)`,
+                transformStyle: 'preserve-3d'
+              }}>
+                <div className="w-14 h-14 mx-auto mb-3 rounded-3xl flex items-center justify-center relative" style={{ 
+                  background: 'linear-gradient(135deg, var(--accent-blue) 0%, rgba(59, 130, 246, 0.8) 100%)',
+                  boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  transform: `translateZ(30px) rotateX(${cardRotations[0].x * 0.2}deg) rotateY(${cardRotations[0].y * 0.2}deg)`,
+                  transformStyle: 'preserve-3d'
+                }}>
+                  <div className="absolute inset-0 rounded-3xl" style={{ 
+                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)'
+                  }}></div>
+                  <BarChart3 className="w-7 h-7 relative z-10 text-white drop-shadow-lg" style={{
+                    transform: `translateZ(20px)`
+                  }} />
+                </div>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Overview</h3>
+                  <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>서비스 현황 개요</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-tertiary)' }}>
                     물류 서비스 현황과 주요 지표를 한눈에 확인할 수 있습니다.
                   </p>
                   <div className="flex items-center justify-center gap-2 text-sm font-medium" style={{ color: 'var(--accent-blue)' }}>
@@ -189,27 +193,55 @@ export default function HomePage() {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-                </motion.div>
+            </div>
 
-              {/* My Order */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
-                className="backdrop-blur-md rounded-2xl p-8 border transition-all duration-300 cursor-pointer hover:scale-105 group"
-                style={{ 
-                  background: 'var(--bg-card)', 
-                  borderColor: 'var(--border-primary)' 
-                }}
-                onClick={() => router.push('/menu/my_order')}
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--accent-green)', opacity: 0.2 }}>
-                    <ShoppingCart className="w-8 h-8" style={{ color: 'var(--accent-green)' }} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>My Order</h3>
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>내 물류 주문</p>
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-tertiary)' }}>
+            {/* My Order */}
+            <div
+              className="profile-card green-glow backdrop-blur-2xl rounded-3xl p-5 border transition-all duration-500 cursor-pointer group flex flex-col justify-center relative overflow-hidden"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                boxShadow: `
+                  0 20px 60px rgba(0, 0, 0, 0.15),
+                  0 8px 25px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.05)
+                `,
+                transform: `perspective(1000px) rotateX(${cardRotations[1].x}deg) rotateY(${cardRotations[1].y}deg) scale3d(1.1, 1.1, 1.1)`,
+                transformStyle: 'preserve-3d',
+                opacity: 1
+              }}
+              onMouseMove={(e) => handleMouseMove(e, 1)}
+              onMouseLeave={() => handleMouseLeave(1)}
+              onClick={() => router.push('/menu/my_order')}
+            >
+              {/* 컴포넌트 내부 그라데이션 오버레이 */}
+              <div className="absolute inset-0 opacity-40" style={{
+                background: `
+                  linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, transparent 50%, rgba(34, 197, 94, 0.08) 100%),
+                  radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 30%)
+                `
+              }}></div>
+              <div className="text-center relative z-10" style={{
+                transform: `translateZ(50px) rotateX(${cardRotations[1].x * 0.1}deg) rotateY(${cardRotations[1].y * 0.1}deg)`,
+                transformStyle: 'preserve-3d'
+              }}>
+                <div className="w-14 h-14 mx-auto mb-3 rounded-3xl flex items-center justify-center relative" style={{ 
+                  background: 'linear-gradient(135deg, var(--accent-green) 0%, rgba(34, 197, 94, 0.8) 100%)',
+                  boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  transform: `translateZ(30px) rotateX(${cardRotations[1].x * 0.2}deg) rotateY(${cardRotations[1].y * 0.2}deg)`,
+                  transformStyle: 'preserve-3d'
+                }}>
+                  <div className="absolute inset-0 rounded-3xl" style={{ 
+                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)'
+                  }}></div>
+                  <ShoppingCart className="w-7 h-7 relative z-10 text-white drop-shadow-lg" style={{
+                    transform: `translateZ(20px)`
+                  }} />
+                </div>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>My Order</h3>
+                  <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>내 물류 주문</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-tertiary)' }}>
                     내가 신청한 물류 서비스 주문 현황을 확인할 수 있습니다.
                   </p>
                   <div className="flex items-center justify-center gap-2 text-sm font-medium" style={{ color: 'var(--accent-green)' }}>
@@ -217,27 +249,55 @@ export default function HomePage() {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-                  </motion.div>
+            </div>
                   
-              {/* Quotation */}
-                  <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.1 }}
-                className="backdrop-blur-md rounded-2xl p-8 border transition-all duration-300 cursor-pointer hover:scale-105 group"
-                style={{ 
-                  background: 'var(--bg-card)', 
-                  borderColor: 'var(--border-primary)' 
-                }}
-                onClick={() => router.push('/menu/quotation')}
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--accent-purple)', opacity: 0.2 }}>
-                    <FileText className="w-8 h-8" style={{ color: 'var(--accent-purple)' }} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Quotation</h3>
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>물류 견적</p>
-                  <p className="text-sm mb-4" style={{ color: 'var(--text-tertiary)' }}>
+            {/* Quotation */}
+            <div
+              className="profile-card purple-glow backdrop-blur-2xl rounded-3xl p-5 border transition-all duration-500 cursor-pointer group flex flex-col justify-center relative overflow-hidden"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                boxShadow: `
+                  0 20px 60px rgba(0, 0, 0, 0.15),
+                  0 8px 25px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.05)
+                `,
+                transform: `perspective(1000px) rotateX(${cardRotations[2].x}deg) rotateY(${cardRotations[2].y}deg) scale3d(1.1, 1.1, 1.1)`,
+                transformStyle: 'preserve-3d',
+                opacity: 1
+              }}
+              onMouseMove={(e) => handleMouseMove(e, 2)}
+              onMouseLeave={() => handleMouseLeave(2)}
+              onClick={() => router.push('/menu/quotation')}
+            >
+              {/* 컴포넌트 내부 그라데이션 오버레이 */}
+              <div className="absolute inset-0 opacity-40" style={{
+                background: `
+                  linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, transparent 50%, rgba(147, 51, 234, 0.08) 100%),
+                  radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 30%)
+                `
+              }}></div>
+              <div className="text-center relative z-10" style={{
+                transform: `translateZ(50px) rotateX(${cardRotations[2].x * 0.1}deg) rotateY(${cardRotations[2].y * 0.1}deg)`,
+                transformStyle: 'preserve-3d'
+              }}>
+                <div className="w-14 h-14 mx-auto mb-3 rounded-3xl flex items-center justify-center relative" style={{ 
+                  background: 'linear-gradient(135deg, var(--accent-purple) 0%, rgba(147, 51, 234, 0.8) 100%)',
+                  boxShadow: '0 8px 32px rgba(147, 51, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  transform: `translateZ(30px) rotateX(${cardRotations[2].x * 0.2}deg) rotateY(${cardRotations[2].y * 0.2}deg)`,
+                  transformStyle: 'preserve-3d'
+                }}>
+                  <div className="absolute inset-0 rounded-3xl" style={{ 
+                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)'
+                  }}></div>
+                  <FileText className="w-7 h-7 relative z-10 text-white drop-shadow-lg" style={{
+                    transform: `translateZ(20px)`
+                  }} />
+                </div>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Quotation</h3>
+                  <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>물류 견적</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-tertiary)' }}>
                     물류 서비스 견적서 요청 및 관리를 할 수 있습니다.
                   </p>
                   <div className="flex items-center justify-center gap-2 text-sm font-medium" style={{ color: 'var(--accent-purple)' }}>
@@ -245,9 +305,64 @@ export default function HomePage() {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-                  </motion.div>
-              </div>
-            </motion.div>
+            </div>
+
+            {/* Account */}
+            <div
+              className="profile-card orange-glow backdrop-blur-2xl rounded-3xl p-5 border transition-all duration-500 cursor-pointer group flex flex-col justify-center relative overflow-hidden"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                boxShadow: `
+                  0 20px 60px rgba(0, 0, 0, 0.15),
+                  0 8px 25px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.05)
+                `,
+                transform: `perspective(1000px) rotateX(${cardRotations[3].x}deg) rotateY(${cardRotations[3].y}deg) scale3d(1.1, 1.1, 1.1)`,
+                transformStyle: 'preserve-3d',
+                opacity: 1
+              }}
+              onMouseMove={(e) => handleMouseMove(e, 3)}
+              onMouseLeave={() => handleMouseLeave(3)}
+              onClick={() => router.push('/menu/account')}
+            >
+              {/* 컴포넌트 내부 그라데이션 오버레이 */}
+              <div className="absolute inset-0 opacity-40" style={{
+                background: `
+                  linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, transparent 50%, rgba(249, 115, 22, 0.08) 100%),
+                  radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 30%)
+                `
+              }}></div>
+              <div className="text-center relative z-10" style={{
+                transform: `translateZ(50px) rotateX(${cardRotations[3].x * 0.1}deg) rotateY(${cardRotations[3].y * 0.1}deg)`,
+                transformStyle: 'preserve-3d'
+              }}>
+                <div className="w-14 h-14 mx-auto mb-3 rounded-3xl flex items-center justify-center relative" style={{ 
+                  background: 'linear-gradient(135deg, #f97316 0%, rgba(249, 115, 22, 0.8) 100%)',
+                  boxShadow: '0 8px 32px rgba(249, 115, 22, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  transform: `translateZ(30px) rotateX(${cardRotations[3].x * 0.2}deg) rotateY(${cardRotations[3].y * 0.2}deg)`,
+                  transformStyle: 'preserve-3d'
+                }}>
+                  <div className="absolute inset-0 rounded-3xl" style={{ 
+                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%)'
+                  }}></div>
+                  <Calculator className="w-7 h-7 relative z-10 text-white drop-shadow-lg" style={{
+                    transform: `translateZ(20px)`
+                  }} />
+                </div>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Account</h3>
+                  <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>정산 관리</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-tertiary)' }}>
+                    물류 서비스 정산 내역을 확인하고 관리할 수 있습니다.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-sm font-medium" style={{ color: '#f97316' }}>
+                    <span>자세히 보기</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+            </div>
+        </div>
         </div>
       </div>
     </div>
