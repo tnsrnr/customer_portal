@@ -297,8 +297,49 @@ export default function AccListPage() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-      <div className="p-6">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+      {/* 레벨 2 패턴 배경 - Account 오렌지색 계열 */}
+      <div className="absolute inset-0">
+        {/* 기본 그라데이션 - 오렌지색 계열 */}
+        <div className="absolute inset-0" style={{
+          background: `
+            linear-gradient(135deg, rgba(249, 115, 22, 0.06) 0%, rgba(251, 146, 60, 0.08) 50%, rgba(234, 88, 12, 0.06) 100%)
+          `
+        }}></div>
+        
+        {/* 격자 패턴 - 더 작고 미묘하게 */}
+        <div className="absolute inset-0 opacity-38" style={{
+          backgroundImage: `
+            linear-gradient(rgba(249, 115, 22, 0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(251, 146, 60, 0.12) 1px, transparent 1px)
+          `,
+          backgroundSize: '42px 42px'
+        }}></div>
+        
+        {/* 점 패턴 - 오렌지색 계열 */}
+        <div className="absolute inset-0 opacity-32" style={{
+          backgroundImage: `
+            radial-gradient(circle at 21px 21px, rgba(249, 115, 22, 0.28) 1.5px, transparent 1.5px),
+            radial-gradient(circle at 63px 63px, rgba(251, 146, 60, 0.28) 1.5px, transparent 1.5px)
+          `,
+          backgroundSize: '84px 84px, 126px 126px',
+          backgroundPosition: '0 0, 42px 42px'
+        }}></div>
+        
+        {/* 원형 패턴 - 따뜻한 색조 */}
+        <div className="absolute inset-0 opacity-16" style={{
+          backgroundImage: `
+            radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.18) 0%, transparent 3%),
+            radial-gradient(circle at 65% 75%, rgba(255, 255, 255, 0.14) 0%, transparent 3%),
+            radial-gradient(circle at 15% 65%, rgba(255, 255, 255, 0.1) 0%, transparent 2%),
+            radial-gradient(circle at 85% 35%, rgba(255, 255, 255, 0.1) 0%, transparent 2%)
+          `,
+          backgroundSize: '320px 320px, 420px 420px, 200px 200px, 260px 260px',
+          backgroundPosition: '0% 0%, 100% 100%, 15% 65%, 85% 35%'
+        }}></div>
+      </div>
+      
+      <div className="relative z-10 p-6">
         <div className="w-full">
           {/* 헤더 */}
           <div className="mb-8">

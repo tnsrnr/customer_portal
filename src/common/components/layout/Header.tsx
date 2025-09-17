@@ -20,38 +20,46 @@ function MenuItem({ menu, pathname }: {
   menu: any; 
   pathname: string; 
 }) {
-  // 메뉴별 색상 정의
+  const router = useRouter();
+  // 메뉴별 색상 정의 - 원래 색상 유지하면서 은은한 효과만 추가
   const getMenuColor = (menuName: string) => {
     switch (menuName) {
       case 'Overview': return {
-        primary: '#3b82f6', // blue
+        primary: '#3b82f6', // blue - 원래 색상 유지
         secondary: 'rgba(59, 130, 246, 0.1)',
-        hover: 'rgba(59, 130, 246, 0.2)'
+        hover: 'rgba(59, 130, 246, 0.15)',
+        gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.12) 100%)'
       };
       case 'My Order': return {
-        primary: '#22c55e', // green
+        primary: '#22c55e', // green - 원래 색상 복원
         secondary: 'rgba(34, 197, 94, 0.1)',
-        hover: 'rgba(34, 197, 94, 0.2)'
+        hover: 'rgba(34, 197, 94, 0.15)',
+        gradient: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.12) 100%)'
       };
       case 'Quotation': return {
-        primary: '#9333ea', // purple
+        primary: '#9333ea', // purple - 원래 색상 복원
         secondary: 'rgba(147, 51, 234, 0.1)',
-        hover: 'rgba(147, 51, 234, 0.2)'
+        hover: 'rgba(147, 51, 234, 0.15)',
+        gradient: 'linear-gradient(135deg, rgba(147, 51, 234, 0.08) 0%, rgba(147, 51, 234, 0.12) 100%)'
       };
       case 'Account': return {
-        primary: '#f97316', // orange
+        primary: '#f97316', // orange - 원래 색상 복원
         secondary: 'rgba(249, 115, 22, 0.1)',
-        hover: 'rgba(249, 115, 22, 0.2)'
+        hover: 'rgba(249, 115, 22, 0.15)',
+        gradient: 'linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(249, 115, 22, 0.12) 100%)'
       };
       default: return {
         primary: '#6b7280', // gray
         secondary: 'rgba(107, 114, 128, 0.1)',
-        hover: 'rgba(107, 114, 128, 0.2)'
+        hover: 'rgba(107, 114, 128, 0.15)',
+        gradient: 'linear-gradient(135deg, rgba(107, 114, 128, 0.08) 0%, rgba(107, 114, 128, 0.12) 100%)'
       };
     }
   };
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { theme } = useTheme();
   const isActive = pathname === menu.path || (menu.submenu && menu.submenu.some((sub: any) => pathname === sub.path));
   const menuColor = getMenuColor(menu.name);
@@ -60,6 +68,7 @@ function MenuItem({ menu, pathname }: {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+        setIsHovered(false);
       }
     };
 
@@ -72,51 +81,113 @@ function MenuItem({ menu, pathname }: {
     };
   }, [isDropdownOpen]);
 
+  // 호버 시 드롭다운 표시 (서브메뉴가 있는 경우만) - 지연 시간 추가
+  useEffect(() => {
+    if (menu.submenu && menu.submenu.length > 0) {
+      if (isHovered) {
+        // 호버 시 즉시 표시
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+        }
+        setIsDropdownOpen(true);
+      } else {
+        // 호버 해제 시 지연 후 숨김
+        hoverTimeoutRef.current = setTimeout(() => {
+          setIsDropdownOpen(false);
+        }, 100); // 100ms 지연
+      }
+    }
+
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, [isHovered, menu.submenu]);
+
   // 서브메뉴가 있는 경우
   if (menu.submenu && menu.submenu.length > 0) {
     return (
       <div className="relative" ref={dropdownRef}>
         <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="flex flex-row items-center gap-x-2 px-4 py-2 rounded-full transition-all duration-200 font-medium text-sm"
+          onClick={() => {
+            // 클릭 시 메인 페이지로 이동
+            router.push(menu.path);
+          }}
+          className="relative flex flex-row items-center gap-x-2 px-3 py-1.5 rounded-full transition-all duration-300 font-medium text-sm overflow-hidden backdrop-blur-sm"
           style={{
             background: isActive 
-              ? (theme === 'dark' ? menuColor.secondary : menuColor.secondary)
+              ? menuColor.gradient
               : 'transparent',
             color: isActive 
               ? menuColor.primary
               : 'var(--text-secondary)',
             boxShadow: isActive 
-              ? `0 4px 12px ${menuColor.secondary}`
-              : 'none'
+              ? `0 4px 16px ${menuColor.secondary}, inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+              : 'none',
+            border: isActive 
+              ? `1px solid ${menuColor.secondary}`
+              : '1px solid transparent'
           }}
           onMouseEnter={(e) => {
+            setIsHovered(true);
+            if (hoverTimeoutRef.current) {
+              clearTimeout(hoverTimeoutRef.current);
+            }
             if (!isActive) {
-              e.currentTarget.style.background = menuColor.hover;
+              e.currentTarget.style.background = menuColor.gradient;
               e.currentTarget.style.color = menuColor.primary;
-              e.currentTarget.style.boxShadow = `0 2px 8px ${menuColor.secondary}`;
+              e.currentTarget.style.boxShadow = `0 2px 12px ${menuColor.secondary}, inset 0 1px 0 rgba(255, 255, 255, 0.08)`;
+              e.currentTarget.style.border = `1px solid ${menuColor.secondary}`;
+              e.currentTarget.style.transform = 'translateY(-1px)';
             }
           }}
           onMouseLeave={(e) => {
+            // 지연 시간을 두고 호버 상태 해제
+            hoverTimeoutRef.current = setTimeout(() => {
+              setIsHovered(false);
+            }, 60);
             if (!isActive) {
               e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.color = 'var(--text-secondary)';
               e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.border = '1px solid transparent';
+              e.currentTarget.style.transform = 'translateY(0px)';
             }
           }}
         >
-          {menu.icon && <menu.icon className="w-4 h-4" />}
-          <span className="whitespace-nowrap">{menu.name}</span>
-          <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+          {/* 미묘한 배경 오버레이 */}
+          {isActive && (
+            <div 
+              className="absolute inset-0 opacity-20"
+              style={{
+                background: `radial-gradient(circle at 50% 50%, ${menuColor.primary}20 0%, transparent 70%)`
+              }}
+            />
+          )}
+          
+          <div className="relative z-10 flex items-center gap-x-2">
+            {menu.icon && <menu.icon className="w-4 h-4" />}
+            <span className="whitespace-nowrap">{menu.name}</span>
+            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+          </div>
         </button>
 
         {isDropdownOpen && (
-          <div className="absolute top-full left-0 mt-2 w-64 rounded-xl shadow-2xl z-50 border"
+          <div 
+            className="absolute top-full left-0 mt-1 w-48 rounded-xl shadow-2xl z-50 border animate-in fade-in-0 zoom-in-95 duration-200"
             style={{
               background: 'var(--bg-dropdown)',
               borderColor: 'var(--border-primary)',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
             }}
+            onMouseEnter={() => {
+              setIsHovered(true);
+              if (hoverTimeoutRef.current) {
+                clearTimeout(hoverTimeoutRef.current);
+              }
+            }}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <div className="p-2">
               {menu.submenu.map((subItem: any, index: number) => {
@@ -160,39 +231,60 @@ function MenuItem({ menu, pathname }: {
     );
   }
 
-  // 일반 메뉴 아이템
+  // 일반 메뉴 아이템 - 은은한 그라데이션 효과 추가
   return (
     <Link
       href={menu.path}
-      className="flex flex-row items-center gap-x-2 px-4 py-2 rounded-full transition-all duration-200 font-medium text-sm"
+      className="relative flex flex-row items-center gap-x-2 px-3 py-1.5 rounded-full transition-all duration-300 font-medium text-sm overflow-hidden backdrop-blur-sm"
       style={{
         background: isActive 
-          ? menuColor.secondary
+          ? menuColor.gradient
           : 'transparent',
         color: isActive 
           ? menuColor.primary
           : 'var(--text-secondary)',
         boxShadow: isActive 
-          ? `0 4px 12px ${menuColor.secondary}`
-          : 'none'
+          ? `0 4px 16px ${menuColor.secondary}, inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+          : 'none',
+        border: isActive 
+          ? `1px solid ${menuColor.secondary}`
+          : '1px solid transparent'
       }}
       onMouseEnter={(e) => {
+        setIsHovered(true);
         if (!isActive) {
-          e.currentTarget.style.background = menuColor.hover;
+          e.currentTarget.style.background = menuColor.gradient;
           e.currentTarget.style.color = menuColor.primary;
-          e.currentTarget.style.boxShadow = `0 2px 8px ${menuColor.secondary}`;
+          e.currentTarget.style.boxShadow = `0 2px 12px ${menuColor.secondary}, inset 0 1px 0 rgba(255, 255, 255, 0.08)`;
+          e.currentTarget.style.border = `1px solid ${menuColor.secondary}`;
+          e.currentTarget.style.transform = 'translateY(-1px)';
         }
       }}
       onMouseLeave={(e) => {
+        setIsHovered(false);
         if (!isActive) {
           e.currentTarget.style.background = 'transparent';
           e.currentTarget.style.color = 'var(--text-secondary)';
           e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.border = '1px solid transparent';
+          e.currentTarget.style.transform = 'translateY(0px)';
         }
       }}
     >
-      {menu.icon && <menu.icon className="w-4 h-4" />}
-      <span className="whitespace-nowrap">{menu.name}</span>
+      {/* 미묘한 배경 오버레이 */}
+      {isActive && (
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: `radial-gradient(circle at 50% 50%, ${menuColor.primary}20 0%, transparent 70%)`
+          }}
+        />
+      )}
+      
+      <div className="relative z-10 flex items-center gap-x-2">
+        {menu.icon && <menu.icon className="w-4 h-4" />}
+        <span className="whitespace-nowrap">{menu.name}</span>
+      </div>
     </Link>
   );
 }
@@ -232,7 +324,7 @@ function SettingsDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={onToggle}
-        className="flex items-center gap-1 px-3 py-2 text-base rounded-lg transition-colors border"
+        className="flex items-center gap-1 px-2.5 py-1.5 text-sm rounded-lg transition-colors border"
         style={{
           color: 'var(--text-secondary)',
           background: 'var(--bg-tertiary)',
@@ -250,7 +342,7 @@ function SettingsDropdown({
         }}
         title="설정"
       >
-        <Settings className="w-5 h-5" />
+        <Settings className="w-4 h-4" />
         <span className="hidden sm:inline">설정</span>
       </button>
 
@@ -359,7 +451,7 @@ export function Header() {
     <header className="backdrop-blur-md shadow-xl border-none z-50 relative" style={{ 
       background: 'var(--bg-primary)' 
     }}>
-      <div className="flex justify-between items-center px-3 py-3">
+      <div className="flex justify-between items-center px-3 py-2">
         <div className="flex items-center space-x-4">
           {/* HTNS 로고 */}
           <Link href="/">
@@ -367,8 +459,8 @@ export function Header() {
               <Image 
                 src="/images/htns-logo.png" 
                 alt="HTNS Logo" 
-                width={110} 
-                height={38} 
+                width={95} 
+                height={32} 
                 className="object-contain"
               />
             </div>

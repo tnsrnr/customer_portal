@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import "tabulator-tables/dist/css/tabulator.min.css";
+import { DateTime } from "luxon";
 
 // Tabulator 인터페이스 확장 (on/off 메소드 정의)
 declare module 'tabulator-tables' {
@@ -788,6 +789,11 @@ const TabulatorGrid = forwardRef<TabulatorGridRef, TabulatorGridProps>((props, r
   // 테이블 초기화
   useEffect(() => {
     if (tableRef.current) {
+      // DateTime을 전역적으로 설정 (luxon 의존성 해결)
+      if (typeof window !== 'undefined') {
+        (window as any).DateTime = DateTime;
+      }
+      
       // 테마에 따른 스타일 설정
       const isDark = theme === 'dark';
       

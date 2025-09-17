@@ -7,10 +7,19 @@ import {
   DollarSign,
   AlertTriangle,
   ChevronRight,
-  BarChart3
+  Plane,
+  Package,
+  TrendingUp,
+  MapPin,
+  Calculator
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/common/components/ui/card';
 import { useTheme } from '@/common/contexts/ThemeContext';
+import { Line } from 'react-chartjs-2';
+import CountUp from 'react-countup';
+
+// Chart.js 설정
+import '@/global/lib/chart';
 
 interface MainDashboardProps {
   onTabChange: (tab: string) => void;
@@ -18,6 +27,80 @@ interface MainDashboardProps {
 
 export default function MainDashboard({ onTabChange }: MainDashboardProps) {
   const { theme } = useTheme();
+
+  // 차트 데이터
+  const chartData = {
+    shipping: {
+      labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월'],
+      datasets: [
+        {
+          label: '총 물동량',
+          data: [130, 147, 153, 174, 179, 205, 218],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        }
+      ]
+    },
+    cost: {
+      labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월'],
+      datasets: [
+        {
+          label: '총 물류비',
+          data: [2500000, 2800000, 3200000, 3500000, 3800000, 4200000, 4500000],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        }
+      ]
+    }
+  };
+
+  // 차트 옵션
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    spanGaps: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: theme === 'dark' ? 'white' : '#374151',
+          font: {
+            size: 10
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: theme === 'dark' ? 'white' : '#6b7280',
+          font: {
+            size: 9
+          }
+        },
+        grid: {
+          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+        }
+      },
+      y: {
+        ticks: {
+          color: theme === 'dark' ? 'white' : '#6b7280',
+          font: {
+            size: 9
+          }
+        },
+        grid: {
+          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+        }
+      }
+    }
+  };
+
   // 메인 대시보드 카드 데이터
   const mainCards = [
     {
@@ -45,32 +128,6 @@ export default function MainDashboard({ onTabChange }: MainDashboardProps) {
         { label: '월간비용', value: '₩3.2M', change: -5.1 },
         { label: '절감률', value: '12.5%', change: 1.2 }
       ]
-    },
-    {
-      id: 'quality',
-      title: '서비스 품질',
-      description: '고객 만족도와 서비스 지표를 확인하세요',
-      icon: CheckCircle,
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'from-purple-500/20 to-purple-600/10',
-      borderColor: 'border-purple-400/30',
-      stats: [
-        { label: '만족도', value: '4.8/5.0', change: 0.3 },
-        { label: '응답시간', value: '2.3시간', change: -0.5 }
-      ]
-    },
-    {
-      id: 'analytics',
-      title: '분석 리포트',
-      description: '상세한 데이터 분석과 트렌드를 확인하세요',
-      icon: BarChart3,
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'from-orange-500/20 to-orange-600/10',
-      borderColor: 'border-orange-400/30',
-      stats: [
-        { label: '월별추이', value: '상승', change: 8.2 },
-        { label: '포트분석', value: 'CNSHK', change: 0 }
-      ]
     }
   ];
 
@@ -81,230 +138,541 @@ export default function MainDashboard({ onTabChange }: MainDashboardProps) {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="text-center"
+        className="text-center relative"
       >
-        <h1 className={`text-4xl font-bold ${
-          theme === 'dark' ? 'text-white' : 'text-slate-800'
-        }`}>물류 대시보드</h1>
+        <div className={`inline-block px-8 py-4 rounded-2xl backdrop-blur-md ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10' 
+            : 'bg-gradient-to-r from-blue-100/80 to-purple-100/80 border border-slate-200 shadow-lg'
+        }`}>
+          <h1 className={`text-5xl font-extrabold bg-gradient-to-r ${
+            theme === 'dark' 
+              ? 'from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent' 
+              : 'from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent'
+          }`}>Overview</h1>
+          <p className={`text-sm mt-2 ${
+            theme === 'dark' ? 'text-blue-200' : 'text-slate-600'
+          }`}>물류 현황 종합 대시보드</p>
+        </div>
       </motion.div>
 
-      {/* 주요 KPI 요약 */}
+      {/* 주요 지표 요약 */}
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        <Card className={`backdrop-blur-md ${
+        {/* 총 물동량 */}
+        <div className={`flex items-center p-6 rounded-xl backdrop-blur-md ${
           theme === 'dark' 
-            ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-400/30' 
-            : 'bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200'
+            ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-400/30' 
+            : 'bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 shadow-lg'
         }`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${
-                  theme === 'dark' ? 'text-blue-200' : 'text-blue-600'
-                }`}>진행중인 운송</p>
-                <p className={`text-2xl font-bold ${
-                  theme === 'dark' ? 'text-white' : 'text-slate-800'
-                }`}>12건</p>
-              </div>
-              <Ship className={`w-8 h-8 ${
-                theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
+          <div className={`p-3 rounded-lg mr-4 ${
+            theme === 'dark' ? 'bg-blue-500/30' : 'bg-blue-100'
+          }`}>
+            <Package className={`w-6 h-6 ${
+              theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+            }`} />
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className={`text-sm font-medium ${
+              theme === 'dark' ? 'text-blue-200' : 'text-blue-600'
+            }`}>총 물동량</span>
+            <span className={`text-2xl font-bold ${
+              theme === 'dark' ? 'text-white' : 'text-slate-800'
+            }`}>
+              <CountUp end={216} duration={2} />건
+            </span>
+            <div className="flex items-center space-x-1">
+              <TrendingUp className={`w-4 h-4 ${
+                theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
               }`} />
+              <span className={`text-sm font-medium ${
+                theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
+              }`}>+38건</span>
             </div>
-            <div className="mt-2">
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                theme === 'dark' 
-                  ? 'text-blue-300 bg-blue-600/30' 
-                  : 'text-blue-600 bg-blue-100'
-              }`}>
-                +2건
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className={`backdrop-blur-md ${
+        {/* 총 비용 */}
+        <div className={`flex items-center p-6 rounded-xl backdrop-blur-md ${
           theme === 'dark' 
-            ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border-emerald-400/30' 
-            : 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200'
+            ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 border border-emerald-400/30' 
+            : 'bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 shadow-lg'
         }`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${
-                  theme === 'dark' ? 'text-emerald-200' : 'text-emerald-600'
-                }`}>정시 배송률</p>
-                <p className={`text-2xl font-bold ${
-                  theme === 'dark' ? 'text-white' : 'text-slate-800'
-                }`}>95.2%</p>
-              </div>
-              <CheckCircle className={`w-8 h-8 ${
-                theme === 'dark' ? 'text-emerald-400' : 'text-emerald-500'
+          <div className={`p-3 rounded-lg mr-4 ${
+            theme === 'dark' ? 'bg-emerald-500/30' : 'bg-emerald-100'
+          }`}>
+            <DollarSign className={`w-6 h-6 ${
+              theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+            }`} />
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className={`text-sm font-medium ${
+              theme === 'dark' ? 'text-emerald-200' : 'text-emerald-600'
+            }`}>총 물류비</span>
+            <span className={`text-2xl font-bold ${
+              theme === 'dark' ? 'text-white' : 'text-slate-800'
+            }`}>
+              ₩<CountUp end={4.5} duration={2} decimals={1} />M
+            </span>
+            <div className="flex items-center space-x-1">
+              <TrendingUp className={`w-4 h-4 ${
+                theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
               }`} />
+              <span className={`text-sm font-medium ${
+                theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
+              }`}>+0.7M</span>
             </div>
-            <div className="mt-2">
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                theme === 'dark' 
-                  ? 'text-emerald-300 bg-emerald-600/30' 
-                  : 'text-emerald-600 bg-emerald-100'
-              }`}>
-                +2.3%
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className={`backdrop-blur-md ${
-          theme === 'dark' 
-            ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-400/30' 
-            : 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200'
-        }`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${
-                  theme === 'dark' ? 'text-purple-200' : 'text-purple-600'
-                }`}>월간 총 비용</p>
-                <p className={`text-2xl font-bold ${
-                  theme === 'dark' ? 'text-white' : 'text-slate-800'
-                }`}>₩3.2M</p>
-              </div>
-              <DollarSign className={`w-8 h-8 ${
-                theme === 'dark' ? 'text-purple-400' : 'text-purple-500'
-              }`} />
-            </div>
-            <div className="mt-2">
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                theme === 'dark' 
-                  ? 'text-red-300 bg-red-600/30' 
-                  : 'text-red-600 bg-red-100'
-              }`}>
-                -5.1%
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`backdrop-blur-md ${
-          theme === 'dark' 
-            ? 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 border-orange-400/30' 
-            : 'bg-gradient-to-br from-orange-50 to-orange-100/50 border-orange-200'
-        }`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${
-                  theme === 'dark' ? 'text-orange-200' : 'text-orange-600'
-                }`}>문제 발생</p>
-                <p className={`text-2xl font-bold ${
-                  theme === 'dark' ? 'text-white' : 'text-slate-800'
-                }`}>3건</p>
-              </div>
-              <AlertTriangle className={`w-8 h-8 ${
-                theme === 'dark' ? 'text-orange-400' : 'text-orange-500'
-              }`} />
-            </div>
-            <div className="mt-2">
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                theme === 'dark' 
-                  ? 'text-orange-300 bg-orange-600/30' 
-                  : 'text-orange-600 bg-orange-100'
-              }`}>
-                주의
-              </span>
-            </div>
-          </CardContent>
-        </Card>
       </motion.div>
 
-      {/* 메인 카드들 */}
+      {/* 모듈별 상세 카드들 */}
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        {mainCards.map((card, index) => (
-          <motion.div
-            key={card.id}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 * index }}
-            whileHover={{ scale: 1.02, y: -5 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Card 
-              className={`backdrop-blur-md transition-all duration-300 cursor-pointer group ${
+        {/* 항공수입 카드 */}
+        <Card className={`group relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30 hover:border-emerald-400/50' 
+            : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300 shadow-lg hover:shadow-2xl'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <CardContent className="p-6 relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-xl ${
+                theme === 'dark' ? 'bg-emerald-500/30' : 'bg-emerald-100'
+              }`}>
+                <Plane className={`w-6 h-6 ${
+                  theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                }`} />
+              </div>
+              <div className="text-right">
+                <p className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
+                }`}>항공수입</p>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                }`}>Air Import</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>금월 물동량</span>
+                <span className={`text-2xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-800'
+                }`}>
+                  <CountUp end={45} duration={2} />건
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>평균 물동량</span>
+                <span className={`text-lg font-semibold ${
+                  theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
+                }`}>38건</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>전월대비</span>
+                <div className="flex items-center space-x-1">
+                  <TrendingUp className={`w-4 h-4 ${
+                    theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
+                  }`}>+7건</span>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-emerald-500/20">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                  }`}>주요 포트</span>
+                  <div className="flex items-center space-x-1">
+                    <MapPin className={`w-3 h-3 ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`} />
+                    <span className={`text-xs font-medium ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                    }`}>ICN↔HAN</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 항공수출 카드 */}
+        <Card className={`group relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:scale-105 ${
                 theme === 'dark' 
-                  ? `bg-gradient-to-br ${card.bgColor} ${card.borderColor} hover:border-opacity-50` 
-                  : `bg-white/80 border-slate-200 hover:border-slate-300 shadow-lg hover:shadow-xl`
-              }`}
-              onClick={() => onTabChange(card.id)}
-            >
-              <CardHeader className="pb-4">
+            ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30 hover:border-amber-400/50' 
+            : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300 shadow-lg hover:shadow-2xl'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <CardContent className="p-6 relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-xl ${
+                theme === 'dark' ? 'bg-amber-500/30' : 'bg-amber-100'
+              }`}>
+                <Plane className={`w-6 h-6 ${
+                  theme === 'dark' ? 'text-amber-400' : 'text-amber-600'
+                }`} />
+              </div>
+              <div className="text-right">
+                <p className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
+                }`}>항공수출</p>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                }`}>Air Export</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>금월 물동량</span>
+                <span className={`text-2xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-800'
+                }`}>
+                  <CountUp end={41} duration={2} />건
+              </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>평균 물동량</span>
+                <span className={`text-lg font-semibold ${
+                  theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
+                }`}>34건</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>전월대비</span>
+                <div className="flex items-center space-x-1">
+                  <TrendingUp className={`w-4 h-4 ${
+                    theme === 'dark' ? 'text-amber-400' : 'text-amber-600'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
+                  }`}>+7건</span>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-amber-500/20">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                  }`}>주요 포트</span>
+                  <div className="flex items-center space-x-1">
+                    <MapPin className={`w-3 h-3 ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                    }`} />
+                    <span className={`text-xs font-medium ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                    }`}>ICN↔LAX</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 해상수입 카드 */}
+        <Card className={`group relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-blue-400/30 hover:border-blue-400/50' 
+            : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-300 shadow-lg hover:shadow-2xl'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <CardContent className="p-6 relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-xl ${
+                theme === 'dark' ? 'bg-blue-500/30' : 'bg-blue-100'
+              }`}>
+                <Ship className={`w-6 h-6 ${
+                  theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                }`} />
+              </div>
+              <div className="text-right">
+                <p className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-blue-300' : 'text-blue-600'
+                }`}>해상수입</p>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                }`}>Sea Import</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+            <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>금월 물동량</span>
+                <span className={`text-2xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-800'
+                }`}>
+                  <CountUp end={72} duration={2} />건
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>평균 물동량</span>
+                <span className={`text-lg font-semibold ${
+                  theme === 'dark' ? 'text-blue-300' : 'text-blue-600'
+                }`}>58건</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>전월대비</span>
+                <div className="flex items-center space-x-1">
+                  <TrendingUp className={`w-4 h-4 ${
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-blue-300' : 'text-blue-600'
+                  }`}>+14건</span>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-blue-500/20">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                  }`}>주요 포트</span>
+                  <div className="flex items-center space-x-1">
+                    <MapPin className={`w-3 h-3 ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`} />
+                    <span className={`text-xs font-medium ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                    }`}>CNSHK↔ICN</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 해상수출 카드 */}
+        <Card className={`group relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:scale-105 ${
+                theme === 'dark' 
+            ? 'bg-gradient-to-br from-red-500/20 to-rose-500/20 border-red-400/30 hover:border-red-400/50' 
+            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-200 hover:border-red-300 shadow-lg hover:shadow-2xl'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <CardContent className="p-6 relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-xl ${
+                theme === 'dark' ? 'bg-red-500/30' : 'bg-red-100'
+              }`}>
+                <Ship className={`w-6 h-6 ${
+                  theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                }`} />
+              </div>
+              <div className="text-right">
+                <p className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-red-300' : 'text-red-600'
+                }`}>해상수출</p>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                }`}>Sea Export</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>금월 물동량</span>
+                <span className={`text-2xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-800'
+                }`}>
+                  <CountUp end={58} duration={2} />건
+              </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>평균 물동량</span>
+                <span className={`text-lg font-semibold ${
+                  theme === 'dark' ? 'text-red-300' : 'text-red-600'
+                }`}>48건</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>전월대비</span>
+                <div className="flex items-center space-x-1">
+                  <TrendingUp className={`w-4 h-4 ${
+                    theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-red-300' : 'text-red-600'
+                  }`}>+10건</span>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-red-500/20">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                  }`}>주요 포트</span>
+                  <div className="flex items-center space-x-1">
+                    <MapPin className={`w-3 h-3 ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                    }`} />
+                    <span className={`text-xs font-medium ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                    }`}>ICN↔LAX</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* 차트 섹션 */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+      >
+        {/* 운송 현황 차트 */}
+        <Card className={`group relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:scale-[1.02] ${
+                theme === 'dark' 
+            ? 'bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-400/20 hover:border-blue-400/40' 
+            : 'bg-gradient-to-br from-blue-50/80 to-cyan-50/80 border-blue-200 hover:border-blue-300 shadow-xl hover:shadow-2xl'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <CardHeader className="pb-6 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${card.color} shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                      <card.icon className="w-6 h-6 text-white" />
+                <div className={`p-3 rounded-xl ${
+                  theme === 'dark' ? 'bg-blue-500/30' : 'bg-blue-100'
+                }`}>
+                  <Ship className={`w-6 h-6 ${
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
                     </div>
                     <div>
-                      <CardTitle className={`text-xl ${
+                  <CardTitle className={`text-xl font-bold ${
                         theme === 'dark' ? 'text-white' : 'text-slate-800'
-                      }`}>{card.title}</CardTitle>
-                      <p className={`text-sm mt-1 ${
+                  }`}>운송 현황</CardTitle>
+                  <p className={`text-sm ${
                         theme === 'dark' ? 'text-blue-200' : 'text-slate-600'
-                      }`}>{card.description}</p>
+                  }`}>월별 물동량 트렌드</p>
                     </div>
                   </div>
-                  <ChevronRight className={`w-5 h-5 transition-all duration-300 ${
+              <button
+                onClick={() => onTabChange('shipping')}
+                className={`group/btn flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                  theme === 'dark' 
+                    ? 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 hover:text-white' 
+                    : 'bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800'
+                }`}
+              >
+                <span className="text-sm font-medium">상세보기</span>
+                <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 relative z-10">
+            <div className="h-48">
+              <Line data={chartData.shipping} options={chartOptions} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 비용 분석 차트 */}
+        <Card className={`group relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:scale-[1.02] ${
                     theme === 'dark' 
-                      ? 'text-blue-300 group-hover:text-white group-hover:translate-x-1' 
-                      : 'text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1'
+            ? 'bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-400/20 hover:border-emerald-400/40' 
+            : 'bg-gradient-to-br from-emerald-50/80 to-green-50/80 border-emerald-200 hover:border-emerald-300 shadow-xl hover:shadow-2xl'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <CardHeader className="pb-6 relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className={`p-3 rounded-xl ${
+                  theme === 'dark' ? 'bg-emerald-500/30' : 'bg-emerald-100'
+                }`}>
+                  <DollarSign className={`w-6 h-6 ${
+                    theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
                   }`} />
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-2 gap-4">
-                  {card.stats.map((stat, statIndex) => (
-                    <div key={statIndex} className={`rounded-lg p-3 ${
-                      theme === 'dark' ? 'bg-white/10' : 'bg-slate-50'
-                    }`}>
-                      <p className={`text-xs font-medium ${
-                        theme === 'dark' ? 'text-blue-200' : 'text-slate-600'
-                      }`}>{stat.label}</p>
-                      <p className={`font-bold text-lg ${
+                <div>
+                  <CardTitle className={`text-xl font-bold ${
                         theme === 'dark' ? 'text-white' : 'text-slate-800'
-                      }`}>{stat.value}</p>
-                      <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
-                        stat.change >= 0 
-                          ? (theme === 'dark' ? 'text-emerald-300 bg-emerald-600/30' : 'text-emerald-600 bg-emerald-100')
-                          : (theme === 'dark' ? 'text-red-300 bg-red-600/30' : 'text-red-600 bg-red-100')
-                      }`}>
-                        {stat.change >= 0 ? '▲' : '▼'} {Math.abs(stat.change)}%
-                      </span>
+                  }`}>비용 분석</CardTitle>
+                  <p className={`text-sm ${
+                    theme === 'dark' ? 'text-emerald-200' : 'text-slate-600'
+                  }`}>월별 물류비 트렌드</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onTabChange('cost')}
+                className={`group/btn flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                  theme === 'dark' 
+                    ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 hover:text-white' 
+                    : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 hover:text-emerald-800'
+                }`}
+              >
+                <span className="text-sm font-medium">상세보기</span>
+                <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+              </button>
                     </div>
-                  ))}
+          </CardHeader>
+          <CardContent className="pt-0 relative z-10">
+            <div className="h-48">
+              <Line data={chartData.cost} options={{
+                ...chartOptions,
+                scales: {
+                  ...chartOptions.scales,
+                  y: {
+                    ...chartOptions.scales.y,
+                    ticks: {
+                      ...chartOptions.scales.y.ticks,
+                      callback: function(value: any) {
+                        return '₩' + (value / 1000000).toFixed(1) + 'M';
+                      }
+                    }
+                  }
+                }
+              }} />
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-        ))}
       </motion.div>
 
-      {/* 안내 메시지 */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-        className="text-center"
-      >
-        <p className={`text-sm ${
-          theme === 'dark' ? 'text-blue-300' : 'text-slate-600'
-        }`}>각 카드를 클릭하여 상세 정보를 확인하세요</p>
-      </motion.div>
     </div>
   );
 }

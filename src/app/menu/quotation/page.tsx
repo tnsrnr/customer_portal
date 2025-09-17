@@ -28,29 +28,46 @@ export default function QuotationPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
-      {/* 고급스러운 배경 패턴 */}
-      <div className="absolute inset-0" style={{ opacity: 0.15 }}>
+      {/* 패턴 배경 */}
+      <div className="absolute inset-0">
+        {/* 기본 그라데이션 */}
         <div className="absolute inset-0" style={{
+          background: `
+            linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(147, 51, 234, 0.08) 50%, rgba(34, 197, 94, 0.12) 100%)
+          `
+        }}></div>
+        
+        {/* 격자 패턴 - 사각형 패턴 유지 */}
+        <div className="absolute inset-0 opacity-60" style={{
           backgroundImage: `
-            radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.3) 0%, transparent 60%),
-            radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 60%),
-            radial-gradient(circle at 40% 40%, rgba(34, 197, 94, 0.3) 0%, transparent 60%),
-            radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 40%)
+            linear-gradient(rgba(59, 130, 246, 0.25) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.25) 1px, transparent 1px)
           `,
-          backgroundSize: '1000px 1000px, 800px 800px, 1200px 1200px, 600px 600px',
-          backgroundPosition: '0% 0%, 100% 100%, 50% 50%, 30% 20%'
+          backgroundSize: '50px 50px'
+        }}></div>
+        
+        {/* 점 패턴 - 정적 유지 */}
+        <div className="absolute inset-0 opacity-50" style={{
+          backgroundImage: `
+            radial-gradient(circle at 25px 25px, rgba(147, 51, 234, 0.4) 2px, transparent 2px),
+            radial-gradient(circle at 75px 75px, rgba(34, 197, 94, 0.4) 2px, transparent 2px)
+          `,
+          backgroundSize: '100px 100px, 150px 150px',
+          backgroundPosition: '0 0, 50px 50px'
+        }}></div>
+        
+        {/* 원형 패턴 - 정적 유지 */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.3)  0%, transparent 4%),
+            radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.25) 0%, transparent 4%),
+            radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.2) 0%, transparent 3%),
+            radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 3%)
+          `,
+          backgroundSize: '350px 350px, 450px 450px, 250px 250px, 300px 300px',
+          backgroundPosition: '0% 0%, 100% 100%, 50% 0%, 0% 100%'
         }}></div>
       </div>
-      
-      {/* 그리드 패턴 오버레이 */}
-      <div className="absolute inset-0" style={{
-        opacity: 0.05,
-        backgroundImage: `
-          linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
-        `,
-        backgroundSize: '40px 40px'
-      }}></div>
       
       <div className="relative z-10 p-6">
         <div className="max-w-6xl mx-auto">

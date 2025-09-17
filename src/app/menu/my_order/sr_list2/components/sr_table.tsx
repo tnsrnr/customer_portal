@@ -5,8 +5,7 @@ import TabulatorGrid, { TabulatorGridRef, DataType } from '@/common/components/T
 import "tabulator-tables/dist/css/tabulator.min.css";
 import { DateTime } from "luxon";
 import { useTheme } from '@/common/hooks/useTheme';
-import { Filter, X } from "lucide-react";
-import { ShippingRequestModal } from './ShippingRequestModal';
+import { Package } from "lucide-react";
 
 interface SRData extends DataType {
   id: number;
@@ -33,40 +32,40 @@ interface SRTableProps {
 export function SRTable({ data, loading }: SRTableProps) {
   const gridRef = useRef<TabulatorGridRef>(null);
   const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedSrNo, setSelectedSrNo] = useState<string>('');
   const { theme } = useTheme();
+
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2 text-gray-600">테이블 데이터를 불러오는 중...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+        <span className="ml-2 text-gray-600">SR 데이터를 불러오는 중...</span>
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <span className="text-gray-600">데이터가 없습니다.</span>
+      <div className="flex items-center justify-center h-32 text-gray-500">
+        <span>SR 데이터가 없습니다.</span>
       </div>
     );
   }
 
-  // 컬럼 정의
+  // 테마에 따른 스타일 설정
+  const isDark = theme === 'dark';
+
   const columns = [
-    {  
-      title: "", 
-      field: "selected", 
+    {
+      title: "",
+      field: "selected",
       formatter: "rowSelection",
       titleFormatter: "rowSelection",
       headerSort: false,
       resizable: false,
       frozen: true,
-      headerHozAlign: "center",
-      hozAlign: "center",
+      headerHozAlign: "center" as const,
+      hozAlign: "center" as const,
       width: 30
     },
     { 
@@ -283,71 +282,20 @@ export function SRTable({ data, loading }: SRTableProps) {
         }
       }
     }
-  ] as any;
+  ];
 
-  // 테마에 따른 스타일 설정
-  const isDark = theme === 'dark';
-  const gridTheme = isDark ? 'dark' : 'light';
-
-  // BKG Status 필터링 함수
-  const handleStatusFilter = (status: string) => {
-    setSelectedStatus(status);
-  };
-
-  // 필터링된 데이터 계산
-  const filteredData = selectedStatus === 'all' 
-    ? data 
-    : data?.filter(item => item.bkgStatus === selectedStatus) || [];
-
-  // 모달 열기 함수
-  const handleOpenModal = (srNo: string) => {
-    setSelectedSrNo(srNo);
-    setIsModalOpen(true);
-  };
-
-  // 모달 닫기 함수
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedSrNo('');
-  };
-
-  // SR NO 버튼 클릭 이벤트 핸들러
-  const handleSrNoClick = (e: Event) => {
-    const target = e.target as HTMLElement;
-    if (target.hasAttribute('data-sr-no')) {
-      const srNo = target.getAttribute('data-sr-no');
-      if (srNo) {
-        handleOpenModal(srNo);
-      }
-    }
-  };
-
-  // 테이블 렌더링 후 이벤트 리스너 추가
-  useEffect(() => {
-    const tableElement = gridRef.current?.getTable()?.element;
-    if (tableElement) {
-      tableElement.addEventListener('click', handleSrNoClick);
-      
-      return () => {
-        tableElement.removeEventListener('click', handleSrNoClick);
-      };
-    }
-  }, [filteredData]);
-  
-  // Tabulator 추가 옵션
   const additionalOptions = {
     movableColumns: true,
-    layout: "fitData", // fitColumns에서 fitData로 변경하여 고정 넓이 사용
+    layout: "fitData" as const, // fitColumns에서 fitData로 변경하여 고정 넓이 사용
     renderVertical: "basic",
     placeholder: "데이터가 없습니다.",
     placeholderBackground: isDark ? "#1f2937" : "white",
     dataLoaderLoading: "데이터 로딩중...",
     dataLoaderError: "데이터 로드 실패",
-    // width: 1400, // 고정 넓이 (픽셀 단위) - 더 큰 값으로 설정
     resizableColumns: true,
     responsiveLayout: false, // 반응형 레이아웃 비활성화
     // 테마 설정
-    theme: gridTheme,
+    theme: isDark ? 'dark' : 'light',
     // 필터 이벤트 핸들러
     dataFiltered: function(filters: any) {
       setHasActiveFilters(filters.length > 0);
@@ -355,78 +303,24 @@ export function SRTable({ data, loading }: SRTableProps) {
   };
 
   return (
-    <div className="h-full flex flex-col relative overflow-hidden" style={{ background: 'transparent' }}>
-      {/* 레벨 2 패턴 배경 - My Order 초록색 계열 */}
-      <div className="absolute inset-0">
-        {/* 기본 그라데이션 - 초록색 계열 */}
-        <div className="absolute inset-0" style={{
-          background: `
-            linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, rgba(16, 185, 129, 0.05) 50%, rgba(5, 150, 105, 0.03) 100%)
-          `
-        }}></div>
-        
-        {/* 격자 패턴 - 더 작고 미묘하게 */}
-        <div className="absolute inset-0 opacity-25" style={{
-          backgroundImage: `
-            linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(16, 185, 129, 0.08) 1px, transparent 1px)
-          `,
-          backgroundSize: '30px 30px'
-        }}></div>
-        
-        {/* 점 패턴 - 초록색 계열 */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `
-            radial-gradient(circle at 15px 15px, rgba(34, 197, 94, 0.15) 1px, transparent 1px),
-            radial-gradient(circle at 45px 45px, rgba(16, 185, 129, 0.15) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px, 90px 90px',
-          backgroundPosition: '0 0, 30px 30px'
-        }}></div>
-      </div>
-      
-      <div className="relative z-10 h-full flex flex-col">
-      {/* 필터 섹션 - 투명 */}
-      <div className="mb-4 p-4 rounded-lg border backdrop-blur-sm" style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        borderColor: 'rgba(34, 197, 94, 0.3)',
-        boxShadow: `
-          0 8px 32px rgba(34, 197, 94, 0.1),
-          0 4px 16px rgba(34, 197, 94, 0.05),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1)
-        `,
-        borderTop: '3px solid rgba(34, 197, 94, 0.6)'
-      }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
-              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>SR 목록</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="h-full flex flex-col">
       {/* 그리드 테이블 */}
-      <div className="flex-1 flex flex-col" style={{ background: 'transparent' }}>
-        <div className="flex-1 overflow-x-auto" style={{ background: 'transparent' }}>
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-x-auto">
           <TabulatorGrid
             ref={gridRef}
-            data={filteredData}
+            data={data}
             columns={columns}
-            additionalOptions={additionalOptions}
-            className="w-full h-full"
+            height="370px"
+            minHeight="300px"
+            selectable={true}
+            enableCellSelection={true}
+            enableClipboard={true}
             theme={theme}
+            className=""
+            additionalOptions={additionalOptions}
           />
         </div>
-      </div>
-
-      {/* Shipping Request 모달 */}
-      <ShippingRequestModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        srNo={selectedSrNo}
-      />
       </div>
     </div>
   );

@@ -114,6 +114,46 @@ export default function QuotationRequestPage() {
       className="min-h-screen relative overflow-hidden"
       style={{ background: 'var(--bg-primary)' }}
     >
+      {/* 레벨 2 패턴 배경 - Quotation 보라색 계열 */}
+      <div className="absolute inset-0">
+        {/* 기본 그라데이션 - 보라색 계열 */}
+        <div className="absolute inset-0" style={{
+          background: `
+            linear-gradient(135deg, rgba(147, 51, 234, 0.06) 0%, rgba(168, 85, 247, 0.08) 50%, rgba(124, 58, 237, 0.06) 100%)
+          `
+        }}></div>
+        
+        {/* 격자 패턴 - 더 작고 미묘하게 */}
+        <div className="absolute inset-0 opacity-35" style={{
+          backgroundImage: `
+            linear-gradient(rgba(147, 51, 234, 0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(168, 85, 247, 0.12) 1px, transparent 1px)
+          `,
+          backgroundSize: '45px 45px'
+        }}></div>
+        
+        {/* 점 패턴 - 보라색 계열 */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `
+            radial-gradient(circle at 22px 22px, rgba(147, 51, 234, 0.25) 1.5px, transparent 1.5px),
+            radial-gradient(circle at 65px 65px, rgba(168, 85, 247, 0.25) 1.5px, transparent 1.5px)
+          `,
+          backgroundSize: '90px 90px, 130px 130px',
+          backgroundPosition: '0 0, 45px 45px'
+        }}></div>
+        
+        {/* 원형 패턴 - 보라색 색조 */}
+        <div className="absolute inset-0 opacity-18" style={{
+          backgroundImage: `
+            radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 3%),
+            radial-gradient(circle at 75% 70%, rgba(255, 255, 255, 0.12) 0%, transparent 3%),
+            radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 2%),
+            radial-gradient(circle at 60% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 2%)
+          `,
+          backgroundSize: '280px 280px, 380px 380px, 180px 180px, 220px 220px',
+          backgroundPosition: '0% 0%, 100% 100%, 40% 80%, 60% 20%'
+        }}></div>
+      </div>
       <div className="relative z-10 min-h-[calc(100vh-64px)] p-3 space-y-3">
         <div className="max-w-4xl mx-auto">
           {/* 헤더 */}
